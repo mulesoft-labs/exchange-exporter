@@ -1,0 +1,24 @@
+group 'com.mulesoft.services'
+version '1.0-SNAPSHOT'
+
+apply plugin: 'groovy'
+apply plugin: 'java'
+apply plugin: 'application'
+
+mainClassName = 'com.mulesoft.services.Main'
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    compile 'org.codehaus.groovy:groovy-all:2.4.7'
+    compile 'org.apache.logging.log4j:log4j-api:2.7'
+    compile 'org.apache.logging.log4j:log4j-1.2-api:2.7'
+    compile 'org.apache.logging.log4j:log4j-core:2.7'
+    compile 'org.apache.logging.log4j:log4j-slf4j-impl:2.7'
+    compile 'commons-cli:commons-cli:1.3.1'
+    compile 'org.codehaus.groovy.modules.http-builder:http-builder:0.7.1'
+
+    testCompile 'org.spockframework:spock-core:1.0-groovy-2.4'
+}
