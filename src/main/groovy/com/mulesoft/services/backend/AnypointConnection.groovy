@@ -16,7 +16,7 @@ class AnypointConnection implements ApiAccessor {
 
     @Bindable String username
     @Bindable String password
-    @Bindable String anypointHost = 'anypoint.mulesoft.com'
+    @Bindable String anypointHost
     @Bindable Boolean ignoreSslErrors = true
 
     private String accessToken

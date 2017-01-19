@@ -22,6 +22,9 @@ class ConnectionProperties {
 
     ConnectionListener listener
 
+    SettingsStore settings = new SettingsStore()
+
+    //components
     JFrame parent
     JTextField userField
     JTextField passwordField
@@ -40,10 +43,13 @@ class ConnectionProperties {
     public void build() {
 
         model = new AnypointConnection()
+        model.setUsername(settings.username)
+        model.setAnypointHost(settings.hostName)
 
         new SwingBuilder().edt {
 
             dialog(title: 'Anypoint Platform Connection', size: [400, 140], locationRelativeTo: null, show: true, owner: parent) {
+
                 gridLayout cols: 2, rows: 5
 
                 label text: 'Username: ', horizontalAlignment: JLabel.RIGHT
@@ -63,12 +69,16 @@ class ConnectionProperties {
                     System.exit(0)
 
                 }
+
                 button text: 'Connect', actionPerformed: {
 
                     model.username = userField.text
                     model.password = passwordField.text
                     model.anypointHost = hostField.text
                     model.ignoreSslErrors = sslIssues.selected
+
+                    settings.username = model.username
+                    settings.hostName = model.anypointHost
 
                     logger.debug("Connection properties: Username: $model.username, Host: $model.anypointHost")
 
