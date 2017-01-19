@@ -1,6 +1,7 @@
 package com.mulesoft.services.ui
 
 import com.mulesoft.services.backend.AnypointConnection
+import com.mulesoft.services.batch.Executor
 import groovy.swing.SwingBuilder
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -27,9 +28,12 @@ class ConnectionProperties {
     JTextField hostField
     JCheckBox sslIssues
 
-    ConnectionProperties(ConnectionListener listener, JFrame parent) {
+    Executor executor
+
+    ConnectionProperties(ConnectionListener listener, JFrame parent, Executor executor) {
         this.listener = listener
         this.parent = parent
+        this.executor = executor
     }
 
 
@@ -39,7 +43,7 @@ class ConnectionProperties {
 
         new SwingBuilder().edt {
 
-            frame(title: 'Anypoint Platform Connection', size: [400, 140], locationRelativeTo: null, show: true) {
+            dialog(title: 'Anypoint Platform Connection', size: [400, 140], locationRelativeTo: null, show: true, owner: parent) {
                 gridLayout cols: 2, rows: 5
 
                 label text: 'Username: ', horizontalAlignment: JLabel.RIGHT

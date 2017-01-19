@@ -25,8 +25,14 @@ class Executor {
         this.progressListener = progressListener
     }
 
-
     public void schedule(BaseBatchJob r) {
+        schedule(r, null)
+    }
+
+    public void schedule(BaseBatchJob r, String name) {
+        if (name) {
+            r.jobName = name
+        }
         logger.debug("Will send ${r.toString()} into executor...")
         r.progressListener = progressListener
         executor.execute(r)

@@ -1,7 +1,5 @@
 package com.mulesoft.services.backend
 
-import groovy.json.JsonOutput
-import groovy.json.JsonSlurper
 import groovyx.net.http.HTTPBuilder
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -56,7 +54,7 @@ class Exchange implements ApiAccessor {
 
     public def allEntries(def orgObject, int page, int responseSize, String filter) {
 
-        HTTPBuilder builder = configureExchangeToken(connection.platformAuthAPIConnection)
+        HTTPBuilder builder = configureExchangeAccess(connection.platformAuthAPIConnection)
 
         def query = [page: page, responseSize: responseSize, includeChildren: false]
 
@@ -96,7 +94,7 @@ class Exchange implements ApiAccessor {
         }
 
 
-        HTTPBuilder builder = configureExchangeToken(connection.platformAPIConnection)
+        HTTPBuilder builder = configureExchangeAccess(connection.platformAPIConnection)
 
         builder.headers.put('Content-Type', 'application/json')
         builder.post(path: "$API_BASE/organizations/${orgObject.value.id}/objects", body: jsonEntry) { resp ->
@@ -109,12 +107,18 @@ class Exchange implements ApiAccessor {
         exchangeInfo.token
     }
 
-    private HTTPBuilder configureExchangeToken(HTTPBuilder builder) {
+    private HTTPBuilder configureExchangeAccess(HTTPBuilder builder) {
 
         def exchangeToken = exchangeInfo.token
 
         //x-token header
         builder?.headers.put('x-token', "Bearer $exchangeToken")
+
+        builder.handler.'403' = { resp ->
+            def jsonResp = fromJsonResponse(resp)
+            throw new RuntimeException(jsonResp.message)
+        }
+
         return  builder
     }
 

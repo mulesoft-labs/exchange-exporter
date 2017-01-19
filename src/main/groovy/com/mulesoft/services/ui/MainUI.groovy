@@ -15,6 +15,7 @@ import javax.swing.JComboBox
 import javax.swing.JFileChooser
 import javax.swing.JFrame
 import javax.swing.JLabel
+import javax.swing.JOptionPane
 import javax.swing.JProgressBar
 import javax.swing.JTable
 import javax.swing.JTextField
@@ -33,11 +34,14 @@ class MainUI implements ConnectionListener, ProgressListener {
     private AnypointConnection apConnection
     private Exchange exchange
 
+    private boolean loggedIn = false
+
     //executor service
     private Executor executorService = new Executor(this)
 
 
     //components
+    private JFrame jframe
     private JProgressBar pb
     private JLabel status
     private JComboBox orgs
@@ -49,8 +53,6 @@ class MainUI implements ConnectionListener, ProgressListener {
     private boolean shouldUpdateTable = false
 
     public void build() {
-
-        def jframe
 
         new SwingBuilder().edt {
 
@@ -121,7 +123,7 @@ class MainUI implements ConnectionListener, ProgressListener {
                     }
 
                     button text: 'Logout', actionPerformed: {
-                        new ConnectionProperties(this, jframe).build()
+                        displayLogin()
                     }
 
                     label text: 'Filter:', horizontalAlignment: JLabel.RIGHT
@@ -150,7 +152,7 @@ class MainUI implements ConnectionListener, ProgressListener {
 
         }
 
-        new ConnectionProperties(this, jframe).build()
+        displayLogin()
 
     }
 
@@ -160,12 +162,14 @@ class MainUI implements ConnectionListener, ProgressListener {
 
         apConnection = connection
 
-        SwingUtilities.invokeLater({
+        executorService.schedule({
             startProgress()
 
             logger.debug("Logging into the platform...")
 
             connection.login()
+
+            loggedIn = true
 
             logger.debug("Connecting to exchange...")
 
@@ -174,7 +178,7 @@ class MainUI implements ConnectionListener, ProgressListener {
             updateUI()
 
             endProgress()
-        })
+        }, "Login")
     }
 
     void updateUI() {
@@ -206,9 +210,9 @@ class MainUI implements ConnectionListener, ProgressListener {
     }
 
     void bgUpdateData(def objItem) {
-        SwingUtilities.invokeLater {
+        executorService.schedule({
             updateData(objItem)
-        }
+        }, 'Fetch Exchange entries.')
     }
 
     void updateData(def objItem){
@@ -268,6 +272,11 @@ class MainUI implements ConnectionListener, ProgressListener {
         return ret
     }
 
+    void displayLogin() {
+        loggedIn = false
+        new ConnectionProperties(this, jframe, executorService).build()
+    }
+
     @Override
     void jobStarted(String name) {
         SwingUtilities.invokeLater {
@@ -295,6 +304,17 @@ class MainUI implements ConnectionListener, ProgressListener {
 
     @Override
     void jobErrored(String name, String errorMessage) {
+
+        SwingUtilities.invokeLater {
+            JOptionPane.showMessageDialog(jframe, "$name: $errorMessage", "Error", JOptionPane.ERROR_MESSAGE)
+
+
+            //check if the error is a login error. This could be greatly improved but for now something that works.
+            if (!loggedIn) {
+                displayLogin()
+            }
+
+        }
 
     }
 }
